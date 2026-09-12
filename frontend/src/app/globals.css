@@ -1,0 +1,135 @@
+@import "tailwindcss";
+
+/*
+ * Nonegaran Design System — Design Tokens
+ * ----------------------------------------
+ * Palette concept: "گندم و جوهر" (wheat & ink) — grounded in the brand's
+ * name (نونگاران / bread-makers), avoiding the generic cream+terracotta
+ * AI-default palette. See /docs/design-system.md for full rationale.
+ */
+
+:root {
+  /* Surface */
+  --color-paper: #eae0c4; /* Wheat — primary light-mode background */
+  --color-paper-raised: #f3ecd9; /* slightly lighter, for raised surfaces */
+  --color-ink: #1b1a17; /* warm near-black — primary text / dark-mode bg */
+  --color-ink-soft: #4a463d; /* secondary text on paper */
+
+  /* Brand accents */
+  --color-saffron: #b8860b; /* primary accent — CTAs, active states */
+  --color-saffron-strong: #96690a; /* hover/pressed */
+  --color-petrol: #1f4a46; /* secondary accent — links, focus rings */
+  --color-petrol-strong: #16332f;
+
+  /* Feedback (used sparingly, never as brand color) */
+  --color-clay: #8c3b2e; /* errors / destructive actions */
+  --color-moss: #3f5e3a; /* success / confirmation */
+
+  /* Borders & hairlines
+     QA fix: the original tones (#c9bd9a on paper, #3a372f on ink) measured
+     1.42:1 and 1.46:1 — below the WCAG 1.4.11 non-text 3:1 floor required
+     for meaningful UI boundaries (button/card/input borders). Replaced with
+     tones from the same warm family that measure >=3:1. */
+  --color-hairline: #8f7d4b; /* light-mode dividers — 3.07:1 on paper */
+  --color-hairline-dark: #79735a; /* dark-mode dividers — 3.66:1 on ink */
+
+  /* Semantic mapping — light mode (default) */
+  --background: var(--color-paper);
+  --foreground: var(--color-ink);
+  --surface-raised: var(--color-paper-raised);
+  --text-muted: var(--color-ink-soft);
+  --accent: var(--color-saffron);
+  --accent-strong: var(--color-saffron-strong);
+  --link: var(--color-petrol);
+  --link-strong: var(--color-petrol-strong);
+  --hairline: var(--color-hairline);
+  /* QA fix: saffron on paper measured 2.47:1 — fails the 3:1 floor for a
+     focus indicator. Petrol on paper measures 7.51:1, so it is the
+     light-mode focus color; dark mode keeps saffron/gold (5.35:1 on ink). */
+  --focus-ring: var(--color-petrol);
+
+  /* Radius: deliberately restrained — this brand does not use rounded-card
+     styling. Only small UI controls (buttons, inputs, tags) get a radius. */
+  --radius-control: 0.25rem;
+  --radius-none: 0;
+
+  /* Motion: one calm, book-like easing curve used project-wide */
+  --ease-page: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration-reveal: 600ms;
+  --duration-interaction: 150ms;
+}
+
+[data-theme="dark"] {
+  --background: var(--color-ink);
+  --foreground: var(--color-paper);
+  --surface-raised: #24221d;
+  --text-muted: #b9b2a0;
+  --accent: #d1a53a;
+  --accent-strong: #e2bb55;
+  --link: #6fb3ac;
+  --link-strong: #8fc9c2;
+  --hairline: var(--color-hairline-dark);
+  --focus-ring: var(--color-saffron-strong);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface-raised: var(--surface-raised);
+  --color-text-muted: var(--text-muted);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-link: var(--link);
+  --color-link-strong: var(--link-strong);
+  --color-hairline: var(--hairline);
+  --color-focus-ring: var(--focus-ring);
+  --color-clay: var(--color-clay);
+  --color-moss: var(--color-moss);
+
+  --font-display: var(--font-naskh);
+  --font-body: var(--font-vazir);
+
+  --radius-control: var(--radius-control);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  transition: background-color var(--duration-interaction) var(--ease-page),
+    color var(--duration-interaction) var(--ease-page);
+}
+
+/* Visible keyboard focus everywhere — accessibility floor, not optional.
+   QA fix: saffron measured 2.47:1 on paper in light mode (fails the 3:1
+   floor for non-text UI). --focus-ring resolves to petrol in light mode
+   (7.51:1) and saffron-strong in dark mode (kept, already compliant). */
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-control);
+}
+
+/* Latin numerals / prices are isolated LTR runs inside RTL text */
+.ltr-run {
+  direction: ltr;
+  unicode-bidi: isolate;
+  display: inline-block;
+}
+
+.font-display {
+  font-family: var(--font-naskh), serif;
+}
