@@ -30,3 +30,5 @@ backend/bootstrap/cache/*.php
 # IDE
 .vscode/
 .idea/
+
+docs/handover-qwen.md
