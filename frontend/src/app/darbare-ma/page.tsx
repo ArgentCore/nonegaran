@@ -2,6 +2,7 @@
 
 export const metadata: Metadata = {
   title: "درباره‌ی نونگاران",
+  description: "نونگاران چیست و با چه معیاری کتاب منتشر می‌کند؛ معرفی رویکرد نشر.",
 };
 
 export default function AboutPage() {

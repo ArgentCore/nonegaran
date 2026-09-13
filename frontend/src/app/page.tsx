@@ -34,8 +34,6 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* A tilted, overlapping shelf — the hero image for a publisher
-            is its books, not a stock photo or abstract graphic. */}
         <div
           className="relative mx-auto flex h-72 w-full max-w-sm items-end justify-center md:h-96"
           aria-hidden
@@ -49,7 +47,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ---------- New releases: asymmetric grid ---------- */}
+      {/* ---------- New releases ---------- */}
       <section className="mx-auto w-full max-w-6xl px-6">
         <div className="mb-8 flex items-baseline justify-between">
           <h2 className="font-display text-2xl">تازه‌های نشر</h2>
@@ -73,7 +71,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ---------- Brand story: typography-driven, no card ---------- */}
+      {/* ---------- Brand story ---------- */}
       <section className="border-y border-[var(--hairline)] bg-[var(--surface-raised)]">
         <div className="mx-auto max-w-3xl px-6 py-20 text-center">
           <p className="font-display text-3xl leading-[1.7] md:text-4xl">
@@ -88,7 +86,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ---------- Manuscript submission teaser ---------- */}
+      {/* ---------- Manuscript submission teaser (honest) ---------- */}
       <section className="mx-auto w-full max-w-6xl px-6">
         <div className="grid gap-8 rounded-[var(--radius-control)] bg-[var(--color-petrol)] p-10 text-[var(--color-paper)] md:grid-cols-[1fr_auto] md:items-center md:p-14">
           <div className="flex flex-col gap-3">
@@ -96,43 +94,29 @@ export default function HomePage() {
               نویسنده یا مترجم هستید؟
             </h2>
             <p className="max-w-[52ch] opacity-90 leading-7">
-              اگر اثری دارید که آماده‌ی انتشار است، آن را برای ما بفرستید.
-              هر اثر را با دقت می‌خوانیم و پاسخ می‌دهیم.
+              نونگاران همواره پذیرای آثار تازه است.
+              سامانه‌ی ارسال اثر به‌زودی در اختیار شما قرار می‌گیرد.
             </p>
           </div>
           <Link
             href="/pazireshe-asar"
             className="justify-self-start rounded-[var(--radius-control)] bg-[var(--color-paper)] px-6 py-3 text-[var(--color-ink)] transition-opacity hover:opacity-90 md:justify-self-end"
           >
-            ارسال اثر
+            شرایط پذیرش اثر
           </Link>
         </div>
       </section>
 
-      {/* ---------- Newsletter ---------- */}
+      {/* ---------- Newsletter (honest — no fake form) ---------- */}
       <section className="mx-auto w-full max-w-2xl px-6 text-center">
         <h2 className="font-display text-2xl">از تازه‌های نشر باخبر شوید</h2>
         <p className="mt-2 text-[var(--text-muted)]">
-          هر ماه یک نامه، بدون تبلیغ اضافه.
+          خبرنامه‌ی نونگاران در دست آماده‌سازی است.
         </p>
-        <form className="mt-6 flex flex-col gap-3 sm:flex-row" action="#">
-          <label htmlFor="newsletter-email" className="sr-only">
-            نشانی ایمیل
-          </label>
-          <input
-            id="newsletter-email"
-            type="email"
-            required
-            placeholder="ایمیل شما"
-            className="flex-1 rounded-[var(--radius-control)] border border-[var(--hairline)] bg-transparent px-4 py-3 outline-none focus-visible:border-[var(--focus-ring)]"
-          />
-          <button
-            type="submit"
-            className="rounded-[var(--radius-control)] bg-[var(--accent)] px-6 py-3 text-[var(--color-ink)] hover:bg-[var(--accent-strong)] transition-colors"
-          >
-            عضویت
-          </button>
-        </form>
+        <p className="mt-6 text-sm text-[var(--text-muted)]">
+          به‌زودی راهی برای باخبر شدن از کتاب‌های تازه در اختیار شما قرار
+          می‌گیرد.
+        </p>
       </section>
     </div>
   );

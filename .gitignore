@@ -32,3 +32,6 @@ backend/bootstrap/cache/*.php
 .idea/
 
 docs/handover-qwen.md
+
+# Phase review temp files
+e-*-diff.txt

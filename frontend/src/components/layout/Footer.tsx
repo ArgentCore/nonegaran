@@ -5,7 +5,7 @@ const columns = [
     title: "نونگاران",
     links: [
       { href: "/darbare-ma", label: "درباره‌ی ما" },
-      { href: "/vaghti", label: "وقتی (بلاگ)" },
+      { href: "/vaghti", label: "وقتی" },
       { href: "/tamas", label: "تماس با ما" },
     ],
   },
@@ -13,7 +13,7 @@ const columns = [
     title: "همکاری",
     links: [
       { href: "/pazireshe-asar", label: "پذیرش اثر" },
-      { href: "/pakhsh", label: "پخش برای کتاب‌فروشی‌ها" },
+      { href: "/pakhsh", label: "پخش و همکاری" },
     ],
   },
   {

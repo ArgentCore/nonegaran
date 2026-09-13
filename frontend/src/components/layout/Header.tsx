@@ -6,7 +6,7 @@ const primaryNav = [
   { href: "/ketabha", label: "کتاب‌ها" },
   { href: "/nevisandegan", label: "نویسندگان" },
   { href: "/darbare-ma", label: "درباره‌ی ما" },
-  { href: "/vaghti", label: "وقتی (بلاگ)" },
+  { href: "/vaghti", label: "وقتی" },
 ];
 
 export default function Header() {

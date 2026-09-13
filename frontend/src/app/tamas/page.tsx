@@ -2,6 +2,7 @@
 
 export const metadata: Metadata = {
   title: "تماس با ما",
+  description: "راه‌های ارتباط با نشر نونگاران.",
 };
 
 export default function ContactPage() {
@@ -13,11 +14,14 @@ export default function ContactPage() {
           صدای شما برای ما مهم است.
         </p>
         <div className="space-y-4 text-[var(--foreground)] max-w-[65ch]">
-          <p>برای پیگیری سفارشات، پیشنهادات یا سوالات کلی، می‌توانید از طریق ایمیل با ما در ارتباط باشید.</p>
+          <p>
+            برای پرسش‌ها، پیشنهادها یا گفت‌وگو درباره‌ی همکاری، می‌توانید از
+            طریق ایمیل با ما در ارتباط باشید.
+          </p>
           <p className="ltr-run text-[var(--link)]">
-          info@nonegaran.example
-          <span className="text-sm text-[var(--text-muted)] mr-2">(موقت)</span>
-    </p>
+            info@nonegaran.example
+            <span className="text-sm text-[var(--text-muted)] mr-2">(موقت)</span>
+          </p>
         </div>
       </div>
     </div>
