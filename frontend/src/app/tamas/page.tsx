@@ -14,7 +14,10 @@ export default function ContactPage() {
         </p>
         <div className="space-y-4 text-[var(--foreground)] max-w-[65ch]">
           <p>برای پیگیری سفارشات، پیشنهادات یا سوالات کلی، می‌توانید از طریق ایمیل با ما در ارتباط باشید.</p>
-          <p className="ltr-run text-[var(--link)]">info@nonegaran.example</p>
+          <p className="ltr-run text-[var(--link)]">
+          info@nonegaran.example
+          <span className="text-sm text-[var(--text-muted)] mr-2">(موقت)</span>
+    </p>
         </div>
       </div>
     </div>

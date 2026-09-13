@@ -1,9 +1,15 @@
 import type { Book } from "@/lib/types";
 
 /**
- * Placeholder catalog data. Titles/authors below are invented for layout
- * and content-design purposes only — replace with the client's real
- * catalog before launch.
+ * ⚠️ DEMO DATA - NOT REAL CATALOG
+ *
+ * This is temporary placeholder data for layout and design purposes.
+ * All books, authors, prices, and descriptions below are INVENTED.
+ *
+ * DO NOT use this data in production.
+ * Replace with real Nonegaran catalog data via API/CMS in Phase 3+.
+ *
+ * Last updated: Phase 2.5
  */
 export const allBooks: Book[] = [
   {
