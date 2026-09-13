@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 
 const columns = [
   {
@@ -20,8 +20,8 @@ const columns = [
     title: "خرید",
     links: [
       { href: "/ketabha", label: "همه‌ی کتاب‌ها" },
+      { href: "/nevisandegan", label: "نویسندگان" },
       { href: "/sabad-kharid", label: "سبد خرید" },
-      { href: "/pishforoosh", label: "پیش‌فروش" },
     ],
   },
 ];
@@ -36,19 +36,13 @@ export default function Footer() {
             نانِ روز را از نانوایی می‌گیرید؛ نانِ ذهن را از اینجا.
           </p>
         </div>
-
         {columns.map((col) => (
           <nav key={col.title} aria-label={col.title}>
-            <h3 className="text-sm text-[var(--text-muted)] mb-3">
-              {col.title}
-            </h3>
+            <h3 className="text-sm text-[var(--text-muted)] mb-3">{col.title}</h3>
             <ul className="flex flex-col gap-2 text-sm">
               {col.links.map((link) => (
                 <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="hover:text-[var(--link)] transition-colors"
-                  >
+                  <Link href={link.href} className="hover:text-[var(--link)] transition-colors">
                     {link.label}
                   </Link>
                 </li>
@@ -57,7 +51,6 @@ export default function Footer() {
           </nav>
         ))}
       </div>
-
       <div className="border-t border-[var(--hairline)]">
         <p className="mx-auto max-w-6xl px-6 py-5 text-sm text-[var(--text-muted)]">
           تمام حقوق برای نشر نونگاران محفوظ است — <span className="ltr-run">{new Date().getFullYear()}</span>

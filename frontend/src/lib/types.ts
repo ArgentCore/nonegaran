@@ -4,15 +4,22 @@ export interface Book {
   slug: string;
   title: string;
   author: string;
+  authorSlug?: string;
   translator?: string;
-  /** Display year in Persian (Jalali) digits, e.g. "۱۴۰۳" */
   yearFa: string;
-  /** Numeric Jalali year, for sorting/filtering. */
   year: number;
   priceToman: number;
-  /** One of the curated cover tones — never an arbitrary/random color. */
   coverTone: "saffron" | "petrol" | "ink" | "moss" | "clay";
+  coverImage?: string;
   category: string;
+  categorySlug?: string;
   bookSize: BookSize;
   inStock: boolean;
+  isPreorder?: boolean;
+  description?: string;
+  excerpt?: string;
+  isbn?: string;
+  sku?: string;
+  pages?: number;
+  publisher?: string;
 }

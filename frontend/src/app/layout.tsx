@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 
-// Body / UI typeface — modern, highly legible, full Persian + Latin digit
-// support. Self-hosted (not next/font/google) because this variable font
-// file is fetched from the upstream project's own repository.
 const vazirmatn = localFont({
   src: "../fonts/Vazirmatn-Variable.woff2",
   variable: "--font-vazir",
@@ -12,9 +11,6 @@ const vazirmatn = localFont({
   weight: "100 900",
 });
 
-// Display typeface — a naskh with print/letterpress character, used for
-// headlines, book titles, and hero moments. Deliberately not a geometric
-// sans, to avoid the generic "tech" register for a publishing brand.
 const notoNaskh = localFont({
   src: "../fonts/NotoNaskhArabic-Variable.ttf",
   variable: "--font-naskh",
@@ -23,12 +19,19 @@ const notoNaskh = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "نونگاران | خانه‌ی نشر",
+  title: {
+    default: "نونگاران | خانه‌ی نشر",
+    template: "%s | نونگاران",
+  },
   description:
     "نونگاران، ناشر کتاب‌های ادبیات و اندیشه — کتاب‌هایی که برای ذهن نان می‌شوند.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html
       lang="fa"
@@ -36,7 +39,16 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       data-theme="light"
       className={`${vazirmatn.variable} ${notoNaskh.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <a href="#main-content" className="skip-link">
+          پرش به محتوای اصلی
+        </a>
+        <Header />
+        <main id="main-content" className="flex-grow">
+          {children}
+        </main>
+        <Footer />
+      </body>
     </html>
   );
 }
