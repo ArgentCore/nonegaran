@@ -1,24 +1,27 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getUniqueAuthors, getBooksByAuthor } from "@/data/books";
+import { getAuthors } from "@/lib/data/authors";
+import { toOldAuthors } from "@/lib/data/authorMapper";
 
 export const metadata: Metadata = {
   title: "نویسندگان",
   description: "فهرست نویسندگان و مترجمان همکار با نشر نونگاران.",
 };
 
-export default function AuthorsPage() {
-  const authors = getUniqueAuthors();
+export default async function AuthorsPage() {
+  const dbAuthors = await getAuthors();
+  const authors = toOldAuthors(dbAuthors);
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-12">
       <h1 className="font-display text-3xl mb-8">نویسندگان</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {authors.map((author) => {
-          const bookCount = getBooksByAuthor(author.slug).length;
+          const dbAuthor = dbAuthors.find(a => a.slug === author.slug);
+          const bookCount = dbAuthor?._count?.books ?? 0;
           return (
-            <Link 
-              key={author.slug} 
+            <Link
+              key={author.slug}
               href={`/nevisandegan/${author.slug}`}
               className="group p-6 border border-[var(--hairline)] rounded-[var(--radius-control)] hover:border-[var(--link)] transition-colors bg-[var(--surface-raised)]"
             >

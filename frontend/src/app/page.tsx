@@ -1,9 +1,11 @@
 import Link from "next/link";
 import BookCover from "@/components/book/BookCover";
-import { featuredBooks } from "@/data/books";
+import { getFeaturedBooks } from "@/lib/data/books";
+import { toOldBooks } from "@/lib/data/mapper";
 
-export default function HomePage() {
-  const [lead, ...rest] = featuredBooks;
+export default async function HomePage() {
+  const featured = toOldBooks(await getFeaturedBooks(5));
+  const [lead, ...rest] = featured;
 
   return (
     <div className="flex flex-col gap-28 pb-28">

@@ -2,7 +2,9 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
-import { getBooksByAuthor, getUniqueAuthors } from "@/data/books";
+import { getAuthors, getAuthorBySlug } from "@/lib/data/authors";
+import { toOldBooks } from "@/lib/data/mapper";
+import { toOldAuthors } from "@/lib/data/authorMapper";
 import BookCover from "@/components/book/BookCover";
 
 interface PageProps {
@@ -11,9 +13,9 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const authors = getUniqueAuthors();
-  const author = authors.find(a => a.slug === slug);
-  if (!author) return { title: "نویسنده یافت نشد" };
+  const dbAuthor = await getAuthorBySlug(slug);
+  if (!dbAuthor) return { title: "نویسنده یافت نشد" };
+  const author = toOldAuthors([dbAuthor])[0];
 
   return {
     title: `آثار ${author.name}`,
@@ -21,20 +23,21 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export function generateStaticParams() {
-  return getUniqueAuthors().map((a) => ({ slug: a.slug }));
+export async function generateStaticParams() {
+  const authors = await getAuthors();
+  return authors.map((a) => ({ slug: a.slug }));
 }
 
 export default async function AuthorPage({ params }: PageProps) {
   const { slug } = await params;
-  const authors = getUniqueAuthors();
-  const author = authors.find(a => a.slug === slug);
+  const dbAuthor = await getAuthorBySlug(slug);
 
-  if (!author) {
+  if (!dbAuthor) {
     notFound();
   }
 
-  const books = getBooksByAuthor(slug);
+  const author = toOldAuthors([dbAuthor])[0];
+  const books = toOldBooks(dbAuthor.books as any);
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-12">

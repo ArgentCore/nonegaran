@@ -2,7 +2,8 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ChevronLeft, BookOpen, Calendar, Ruler, Hash } from "lucide-react";
-import { getBookBySlug, allBooks } from "@/data/books";
+import { getBookBySlug, getBooks } from "@/lib/data/books";
+import { toOldBook, toOldBooks } from "@/lib/data/mapper";
 import { formatToman } from "@/lib/format";
 
 const toneMap: Record<string, string> = {
@@ -27,8 +28,9 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const book = getBookBySlug(slug);
-  if (!book) return { title: "کتاب یافت نشد" };
+  const dbBook = await getBookBySlug(slug);
+  if (!dbBook) return { title: "کتاب یافت نشد" };
+  const book = toOldBook(dbBook);
 
   return {
     title: book.title,
@@ -42,17 +44,20 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export function generateStaticParams() {
-  return allBooks.map((b) => ({ slug: b.slug }));
+export async function generateStaticParams() {
+  const books = await getBooks({ status: "published" });
+  return books.map((b) => ({ slug: b.slug }));
 }
 
 export default async function BookDetailPage({ params }: PageProps) {
   const { slug } = await params;
-  const book = getBookBySlug(slug);
+  const dbBook = await getBookBySlug(slug);
 
-  if (!book) {
+  if (!dbBook) {
     notFound();
   }
+
+  const book = toOldBook(dbBook);
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-12">
@@ -66,7 +71,7 @@ export default async function BookDetailPage({ params }: PageProps) {
 
       <div className="grid grid-cols-1 gap-12 md:grid-cols-[1fr_1.5fr]">
         <div className="flex flex-col items-center md:items-start">
-          <div 
+          <div
             className="w-full max-w-sm aspect-[3/4] rounded-[var(--radius-control)] flex flex-col justify-between p-8 shadow-lg"
             style={{ background: toneMap[book.coverTone], color: toneTextMap[book.coverTone] }}
           >
@@ -102,7 +107,7 @@ export default async function BookDetailPage({ params }: PageProps) {
               <span className="text-[var(--text-muted)]">قیمت:</span>
               <span className="text-2xl font-medium ltr-run">{formatToman(book.priceToman)} <span className="text-sm text-[var(--text-muted)]">تومان</span></span>
             </div>
-            
+
             <div className="flex items-center gap-3">
               {book.inStock ? (
                 <span className="flex items-center gap-2 text-[var(--color-moss)] text-sm">
@@ -120,7 +125,7 @@ export default async function BookDetailPage({ params }: PageProps) {
               )}
             </div>
 
-            <button 
+            <button
               disabled={!book.inStock}
               className="w-full bg-[var(--foreground)] text-[var(--background)] py-3 rounded-[var(--radius-control)] font-medium transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
             >

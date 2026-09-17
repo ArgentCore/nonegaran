@@ -1,0 +1,194 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum BookStatus {
+  draft
+  published
+  out_of_stock
+  discontinued
+}
+
+enum BookSize {
+  raghi
+  vaziri
+  jibi
+  khashti
+}
+
+enum CoverTone {
+  saffron
+  petrol
+  ink
+  moss
+  clay
+}
+
+enum OrderStatus {
+  pending
+  paid
+  processing
+  shipped
+  delivered
+  cancelled
+  refunded
+}
+
+enum UserRole {
+  admin
+  customer
+}
+
+enum SubmissionStatus {
+  pending
+  reviewed
+  accepted
+  rejected
+}
+
+model Author {
+  id        String   @id @default(uuid())
+  slug      String   @unique
+  name      String
+  bio       String?
+  avatar    String?
+  books     Book[]   @relation("BookAuthor")
+  translations Book[] @relation("BookTranslator")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  name        String
+  description String?
+  books       Book[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Book {
+  id          String     @id @default(uuid())
+  slug        String     @unique
+  title       String
+  author      Author     @relation("BookAuthor", fields: [authorId], references: [id])
+  authorId    String
+  translator  Author?    @relation("BookTranslator", fields: [translatorId], references: [id])
+  translatorId String?
+  category    Category   @relation(fields: [categoryId], references: [id])
+  categoryId  String
+  description String?
+  excerpt     String?
+  isbn        String?    @unique
+  sku         String     @unique
+  year        Int?
+  yearFa      String?
+  pages       Int?
+  priceToman  Int
+  coverImage  String?
+  coverTone   CoverTone  @default(petrol)   
+  bookSize    BookSize   @default(raghi)
+  status      BookStatus @default(draft)
+  inStock     Boolean    @default(true)
+  isPreorder  Boolean    @default(false)
+  cartItems   CartItem[]
+  orderItems  OrderItem[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  publishedAt DateTime?
+
+  @@index([slug])
+  @@index([authorId])
+  @@index([categoryId])
+  @@index([status])
+}
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String
+  role         UserRole  @default(customer)
+  name         String?
+  cart         Cart?
+  orders       Order[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Cart {
+  id        String     @id @default(uuid())
+  user      User?      @relation(fields: [userId], references: [id])
+  userId    String?    @unique
+  sessionId String?    @unique
+  items     CartItem[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model CartItem {
+  id        String   @id @default(uuid())
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  cartId    String
+  book      Book     @relation(fields: [bookId], references: [id])
+  bookId    String
+  quantity  Int
+  addedAt   DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([cartId, bookId])
+  @@index([cartId])
+}
+
+model Order {
+  id              String      @id @default(uuid())
+  user            User        @relation(fields: [userId], references: [id])
+  userId          String
+  status          OrderStatus @default(pending)
+  totalAmount     Int
+  paymentMethod   String?
+  paymentRefId    String?
+  shippingAddress Json?
+  items           OrderItem[]
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  paidAt          DateTime?
+
+  @@index([userId])
+  @@index([status])
+}
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId   String
+  book      Book    @relation(fields: [bookId], references: [id])
+  bookId    String
+  quantity  Int
+  unitPrice Int
+  subtotal  Int
+}
+
+model Submission {
+  id          String           @id @default(uuid())
+  authorName  String
+  authorEmail String
+  title       String
+  description String?
+  fileUrl     String?
+  status      SubmissionStatus @default(pending)
+  createdAt   DateTime         @default(now())
+  reviewedAt  DateTime?
+}
+
+model NewsletterSubscriber {
+  id              String    @id @default(uuid())
+  email           String    @unique
+  subscribedAt    DateTime  @default(now())
+  unsubscribedAt  DateTime?
+}

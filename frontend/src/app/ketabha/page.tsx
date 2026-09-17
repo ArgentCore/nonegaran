@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { allBooks } from "@/data/books";
+import { getBooks } from "@/lib/data/books";
+import { toOldBooks } from "@/lib/data/mapper";
 import CatalogClient from "@/components/catalog/CatalogClient";
 
 export const metadata: Metadata = {
@@ -20,6 +21,9 @@ export default async function BookListingPage({ searchParams }: PageProps) {
   const size = typeof params.size === "string" ? params.size : undefined;
   const sort = typeof params.sort === "string" ? params.sort : "newest";
   const maxPrice = params.maxPrice ? Number(params.maxPrice) : 400000;
+
+  const dbBooks = await getBooks({ status: "published" });
+  const allBooks = toOldBooks(dbBooks);
 
   let filtered = [...allBooks];
 
