@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
-import { getAuthors, getAuthorBySlug } from "@/lib/data/authors";
+import { getAuthors, getAuthorBySlug, authorWorks } from "@/lib/data/authors";
 import { toOldBooks } from "@/lib/data/mapper";
 import { toOldAuthors } from "@/lib/data/authorMapper";
 import BookCover from "@/components/book/BookCover";
@@ -37,7 +37,7 @@ export default async function AuthorPage({ params }: PageProps) {
   }
 
   const author = toOldAuthors([dbAuthor])[0];
-  const books = toOldBooks(dbAuthor.books as any);
+  const books = toOldBooks(authorWorks(dbAuthor));
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-12">

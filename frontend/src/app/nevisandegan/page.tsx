@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getAuthors } from "@/lib/data/authors";
+import { getAuthors, authorWorksCount } from "@/lib/data/authors";
 import { toOldAuthors } from "@/lib/data/authorMapper";
 
 export const metadata: Metadata = {
@@ -18,7 +18,7 @@ export default async function AuthorsPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {authors.map((author) => {
           const dbAuthor = dbAuthors.find(a => a.slug === author.slug);
-          const bookCount = dbAuthor?._count?.books ?? 0;
+          const bookCount = dbAuthor ? authorWorksCount(dbAuthor) : 0;
           return (
             <Link
               key={author.slug}

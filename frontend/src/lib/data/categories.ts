@@ -1,15 +1,17 @@
 import { prisma } from '@/lib/prisma'
-import type { Category } from '@prisma/client'
+import type { Prisma } from '@prisma/client'
 
-export type CategoryWithCount = Category & {
-  _count: { books: number }
-}
+export const categoryInclude = {
+  _count: { select: { books: true } },
+} as const
+
+export type CategoryWithCount = Prisma.CategoryGetPayload<{
+  include: typeof categoryInclude
+}>
 
 export async function getCategories(): Promise<CategoryWithCount[]> {
   return prisma.category.findMany({
-    include: {
-      _count: { select: { books: true } },
-    },
+    include: categoryInclude,
     orderBy: { name: 'asc' },
-  }) as Promise<CategoryWithCount[]>
+  })
 }

@@ -1,11 +1,15 @@
 import { prisma } from '@/lib/prisma'
-import type { Book, Prisma } from '@prisma/client'
+import type { Prisma } from '@prisma/client'
 
-export type BookWithRelations = Book & {
-  author: { id: string; slug: string; name: string }
-  translator: { id: string; slug: string; name: string } | null
-  category: { id: string; slug: string; name: string }
-}
+export const bookInclude = {
+  author: { select: { id: true, slug: true, name: true } },
+  translator: { select: { id: true, slug: true, name: true } },
+  category: { select: { id: true, slug: true, name: true } },
+} as const
+
+export type BookWithRelations = Prisma.BookGetPayload<{
+  include: typeof bookInclude
+}>
 
 export async function getBooks(filters?: {
   categorySlug?: string
@@ -28,26 +32,18 @@ export async function getBooks(filters?: {
 
   return prisma.book.findMany({
     where,
-    include: {
-      author: { select: { id: true, slug: true, name: true } },
-      translator: { select: { id: true, slug: true, name: true } },
-      category: { select: { id: true, slug: true, name: true } },
-    },
+    include: bookInclude,
     orderBy: { publishedAt: 'desc' },
     take: filters?.take,
     skip: filters?.skip,
-  }) as Promise<BookWithRelations[]>
+  })
 }
 
 export async function getBookBySlug(slug: string): Promise<BookWithRelations | null> {
   return prisma.book.findUnique({
     where: { slug },
-    include: {
-      author: { select: { id: true, slug: true, name: true } },
-      translator: { select: { id: true, slug: true, name: true } },
-      category: { select: { id: true, slug: true, name: true } },
-    },
-  }) as Promise<BookWithRelations | null>
+    include: bookInclude,
+  })
 }
 
 export async function getFeaturedBooks(take = 4): Promise<BookWithRelations[]> {

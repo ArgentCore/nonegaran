@@ -1,47 +1,43 @@
 import { prisma } from '@/lib/prisma'
-import type { Author, Book } from '@prisma/client'
+import type { Prisma } from '@prisma/client'
+import { bookInclude, type BookWithRelations } from './books'
 
-export type AuthorWithBooks = Author & {
-  books: (Book & {
-    author: { id: string; slug: string; name: string }
-    translator: { id: string; slug: string; name: string } | null
-    category: { id: string; slug: string; name: string }
-  })[]
-  _count: { books: number }
-}
+export const authorInclude = {
+  books: {
+    where: { status: 'published' },
+    include: bookInclude,
+    orderBy: { publishedAt: 'desc' },
+  },
+  translations: {
+    where: { status: 'published' },
+    include: bookInclude,
+    orderBy: { publishedAt: 'desc' },
+  },
+  _count: { select: { books: true, translations: true } },
+} as const
+
+export type AuthorWithBooks = Prisma.AuthorGetPayload<{
+  include: typeof authorInclude
+}>
 
 export async function getAuthors(): Promise<AuthorWithBooks[]> {
   return prisma.author.findMany({
-    include: {
-      books: {
-        where: { status: 'published' },
-        include: {
-          author: { select: { id: true, slug: true, name: true } },
-          translator: { select: { id: true, slug: true, name: true } },
-          category: { select: { id: true, slug: true, name: true } },
-        },
-        orderBy: { publishedAt: 'desc' },
-      },
-      _count: { select: { books: true } },
-    },
+    include: authorInclude,
     orderBy: { name: 'asc' },
-  }) as Promise<AuthorWithBooks[]>
+  })
 }
 
 export async function getAuthorBySlug(slug: string): Promise<AuthorWithBooks | null> {
   return prisma.author.findUnique({
     where: { slug },
-    include: {
-      books: {
-        where: { status: 'published' },
-        include: {
-          author: { select: { id: true, slug: true, name: true } },
-          translator: { select: { id: true, slug: true, name: true } },
-          category: { select: { id: true, slug: true, name: true } },
-        },
-        orderBy: { publishedAt: 'desc' },
-      },
-      _count: { select: { books: true } },
-    },
-  }) as Promise<AuthorWithBooks | null>
+    include: authorInclude,
+  })
+}
+
+export function authorWorks(author: AuthorWithBooks): BookWithRelations[] {
+  return [...author.books, ...author.translations]
+}
+
+export function authorWorksCount(author: AuthorWithBooks): number {
+  return author.books.length + author.translations.length
 }
