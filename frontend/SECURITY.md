@@ -47,3 +47,15 @@ npx tsx scripts/change-admin-password.ts
 - JWT revocation: session table در DB
 - Audit log: middleware + DB
 - CSP headers + HSTS در next.config
+
+## Secret Leakage Warning
+
+رمز پیش‌فرض admin یعنی `admin123456` در تاریخچه‌ی Git این ریپازیتوری ذخیره شده است
+(در فایل `prisma/seed.ts`، از commit bc9413e به بعد).
+این یک پروژه‌ی نمونه‌کار (portfolio) است و هرگز برای production استفاده نمی‌شود.
+
+اگر روزی خواستید این repo را به production ببرید، قبل از هر کاری باید:
+1. تاریخچه‌ی Git را با BFG Repo-Cleaner یا git filter-repo پاکسازی کنید
+2. رمز admin را با `scripts/change-admin-password.ts` به رمز قوی تغییر دهید
+3. تمام کلیدهای API و متغیرهای .env را rotate کنید
+4. NEXTAUTH_SECRET را با مقدار تصادفی قوی (حداقل 32 کاراکتر) جایگزین کنید
