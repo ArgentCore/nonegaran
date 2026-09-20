@@ -6,12 +6,14 @@ import { Prisma } from "@prisma/client"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { bookSchema, type BookFormValues } from "@/lib/validations/book"
+import { bookDbErrorMessage } from "@/lib/db-errors"
 
-async function requireAdmin() {
+async function requireAdmin(): Promise<{ error: string } | null> {
   const session = await auth()
   if (!session || session.user?.role !== "admin") {
-    throw new Error("دسترسی غیرمجاز")
+    return { error: "دسترسی غیرمجاز" }
   }
+  return null
 }
 
 function parseBookInput(formData: FormData) {
@@ -90,31 +92,6 @@ function toBookUpdateInput(v: BookFormValues): Prisma.BookUpdateInput {
   }
 }
 
-function dbErrorMessage(e: unknown, op: "create" | "update" | "delete"): string {
-  if (e instanceof Prisma.PrismaClientKnownRequestError) {
-    if (e.code === "P2002") {
-      const target = (e.meta?.target as string[] | undefined) ?? []
-      if (target.includes("isbn")) return "شابک (ISBN) قبلاً برای کتاب دیگری ثبت شده است."
-      if (target.includes("sku")) return "SKU قبلاً برای کتاب دیگری ثبت شده است."
-      if (target.includes("slug")) return "اسلاگ قبلاً استفاده شده است. یک اسلاگ یکتا وارد کنید."
-      return "مقدار واردشده تکراری است."
-    }
-    if (e.code === "P2003") {
-      if (op === "delete") {
-        return "این کتاب در سبد خرید یا سفارش‌ها استفاده شده و قابل حذف نیست."
-      }
-      return "نویسنده یا دسته‌بندی انتخاب‌شده وجود ندارد."
-    }
-    if (e.code === "P2025") {
-      if (op === "delete") {
-        return "کتاب موردنظر پیدا نشد."
-      }
-      return "نویسنده، مترجم یا دسته‌بندی انتخاب‌شده وجود ندارد."
-    }
-  }
-  return "خطایی در ارتباط با پایگاه داده رخ داد. دوباره تلاش کنید."
-}
-
 function revalidateAll() {
   revalidatePath("/admin/books")
   revalidatePath("/ketabha")
@@ -122,7 +99,8 @@ function revalidateAll() {
 }
 
 export async function createBook(formData: FormData): Promise<{ error: string } | undefined> {
-  await requireAdmin()
+  const denied = await requireAdmin()
+  if (denied) return denied
   const parsed = parseBookInput(formData)
   if (!parsed.success) {
     return { error: parsed.error.issues[0].message }
@@ -134,14 +112,15 @@ export async function createBook(formData: FormData): Promise<{ error: string } 
   try {
     await prisma.book.create({ data })
   } catch (e) {
-    return { error: dbErrorMessage(e, "create") }
+    return { error: bookDbErrorMessage(e, "create") }
   }
   revalidateAll()
   redirect("/admin/books")
 }
 
 export async function updateBook(id: string, formData: FormData): Promise<{ error: string } | undefined> {
-  await requireAdmin()
+  const denied = await requireAdmin()
+  if (denied) return denied
   const parsed = parseBookInput(formData)
   if (!parsed.success) {
     return { error: parsed.error.issues[0].message }
@@ -160,18 +139,19 @@ export async function updateBook(id: string, formData: FormData): Promise<{ erro
   try {
     await prisma.book.update({ where: { id }, data })
   } catch (e) {
-    return { error: dbErrorMessage(e, "update") }
+    return { error: bookDbErrorMessage(e, "update") }
   }
   revalidateAll()
   redirect("/admin/books")
 }
 
 export async function deleteBook(id: string): Promise<{ error: string } | undefined> {
-  await requireAdmin()
+  const denied = await requireAdmin()
+  if (denied) return denied
   try {
     await prisma.book.delete({ where: { id } })
   } catch (e) {
-    return { error: dbErrorMessage(e, "delete") }
+    return { error: bookDbErrorMessage(e, "delete") }
   }
   revalidateAll()
 }

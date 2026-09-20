@@ -1,101 +1,84 @@
 "use client"
 
-import { useState } from "react"
+import { Suspense } from "react"
+import { useSearchParams } from "next/navigation"
 import { signIn } from "next-auth/react"
-import { useRouter } from "next/navigation"
 
-export default function LoginPage() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
-  const [loading, setLoading] = useState(false)
-  const router = useRouter()
+const errorMessages: Record<string, string> = {
+  CredentialsSignin: "ایمیل یا رمز عبور اشتباه است",
+  RATE_LIMITED: "تعداد تلاش‌های ورود بیش از حد مجاز است. چند دقیقه بعد دوباره امتحان کنید.",
+}
 
-  const handleSubmit = async (e: React.FormEvent) => {
+function LoginForm() {
+  const searchParams = useSearchParams()
+  const key = searchParams.get("code") ?? searchParams.get("error")
+  const displayError = key ? (errorMessages[key] ?? "ورود ناموفق بود") : ""
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    setError("")
-    setLoading(true)
-
-    try {
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      })
-
-      if (result?.error) {
-        setError("ایمیل یا رمز عبور اشتباه است")
-      } else {
-        router.push("/admin/dashboard")
-        router.refresh()
-      }
-    } catch {
-      setError("خطایی رخ داد. دوباره تلاش کنید.")
-    } finally {
-      setLoading(false)
-    }
+    const formData = new FormData(e.currentTarget)
+    const email = String(formData.get("email") ?? "")
+    const password = String(formData.get("password") ?? "")
+    await signIn("credentials", { email, password, callbackUrl: "/admin/dashboard" })
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[var(--background)] px-4">
-      <div className="w-full max-w-md space-y-8 rounded-[var(--radius-control)] border border-[var(--hairline)] bg-[var(--surface-raised)] p-8">
-        <div className="text-center">
-          <h1 className="font-display text-3xl">ورود به پنل مدیریت</h1>
-          <p className="mt-2 text-sm text-[var(--text-muted)]">
-            نونگاران — نشر کتاب
-          </p>
-        </div>
+    <div className="flex min-h-[70vh] items-center justify-center px-6 py-12">
+      <div className="w-full max-w-md rounded-[var(--radius-control)] border border-[var(--hairline)] bg-[var(--surface-raised)] p-8">
+        <h1 className="font-display text-3xl text-center">ورود به پنل مدیریت</h1>
+        <p className="mt-2 text-center text-sm text-[var(--text-muted)]">
+          نونگاران — نشر کتاب
+        </p>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {error && (
-            <div className="rounded-[var(--radius-control)] border border-[var(--color-clay)] bg-[var(--color-clay)]/10 p-3 text-sm text-[var(--color-clay)]">
-              {error}
-            </div>
-          )}
+        {displayError && (
+          <div className="mt-6 rounded-[var(--radius-control)] border border-[var(--color-clay)] bg-[var(--color-clay)]/10 p-3 text-sm text-[var(--color-clay)]">
+            {displayError}
+          </div>
+        )}
 
+        <form onSubmit={handleSubmit} className="mt-6 space-y-5">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-[var(--foreground)]">
-              ایمیل
-            </label>
+            <label htmlFor="email" className="block text-sm font-medium">ایمیل</label>
             <input
               id="email"
+              name="email"
               type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
               required
-              className="mt-1 block w-full rounded-[var(--radius-control)] border border-[var(--hairline)] bg-[var(--background)] px-3 py-2 text-[var(--foreground)] focus:border-[var(--link)] focus:outline-none focus:ring-1 focus:ring-[var(--link)]"
               placeholder="admin@nonegaran.local"
+              className="mt-1 block w-full rounded-[var(--radius-control)] border border-[var(--hairline)] bg-[var(--background)] px-3 py-2 focus:border-[var(--link)] focus:outline-none focus:ring-1 focus:ring-[var(--link)]"
             />
           </div>
-
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-[var(--foreground)]">
-              رمز عبور
-            </label>
+            <label htmlFor="password" className="block text-sm font-medium">رمز عبور</label>
             <input
               id="password"
+              name="password"
               type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
               required
-              className="mt-1 block w-full rounded-[var(--radius-control)] border border-[var(--hairline)] bg-[var(--background)] px-3 py-2 text-[var(--foreground)] focus:border-[var(--link)] focus:outline-none focus:ring-1 focus:ring-[var(--link)]"
               placeholder="••••••••"
+              className="mt-1 block w-full rounded-[var(--radius-control)] border border-[var(--hairline)] bg-[var(--background)] px-3 py-2 focus:border-[var(--link)] focus:outline-none focus:ring-1 focus:ring-[var(--link)]"
             />
           </div>
-
           <button
             type="submit"
-            disabled={loading}
-            className="w-full rounded-[var(--radius-control)] bg-[var(--foreground)] py-2 text-[var(--background)] transition-opacity hover:opacity-90 disabled:opacity-50"
+            className="w-full rounded-[var(--radius-control)] bg-[var(--foreground)] px-6 py-2.5 text-[var(--background)] transition-opacity hover:opacity-90"
           >
-            {loading ? "در حال ورود..." : "ورود"}
+            ورود
           </button>
         </form>
 
-        <p className="text-center text-xs text-[var(--text-muted)]">
+        <p className="mt-6 text-center text-xs text-[var(--text-muted)]">
           فقط کاربران با نقش مدیر می‌توانند وارد شوند
         </p>
       </div>
     </div>
+  )
+}
+
+export default function AdminLoginPage() {
+  return (
+    <Suspense fallback={<div className="p-12 text-center">در حال بارگذاری...</div>}>
+      <LoginForm />
+    </Suspense>
   )
 }

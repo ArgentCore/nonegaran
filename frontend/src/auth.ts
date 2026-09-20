@@ -1,67 +1,104 @@
-import NextAuth from "next-auth"
+import NextAuth, { CredentialsSignin } from "next-auth"
 import Credentials from "next-auth/providers/credentials"
-import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
+import { PrismaClient } from "@prisma/client"
 
-export const { handlers, signIn, signOut, auth } = NextAuth({
+const prisma = new PrismaClient()
+
+class RateLimitSignin extends CredentialsSignin {
+  code = "RATE_LIMITED"
+}
+
+const rateLimit = new Map<string, { count: number; resetAt: number }>()
+const MAX_ATTEMPTS = 5
+const WINDOW_MS = 15 * 60 * 1000
+
+function checkRateLimit(email: string): boolean {
+  const now = Date.now()
+  const entry = rateLimit.get(email)
+  if (!entry || now > entry.resetAt) {
+    rateLimit.set(email, { count: 0, resetAt: now + WINDOW_MS })
+    return true
+  }
+  return entry.count < MAX_ATTEMPTS
+}
+
+function recordFailure(email: string) {
+  const entry = rateLimit.get(email)
+  if (entry) {
+    entry.count += 1
+    console.log(`[auth] تلاش ناموفق #${entry.count} برای: ${email}`)
+  }
+}
+
+function resetRateLimit(email: string) {
+  rateLimit.delete(email)
+}
+
+export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     Credentials({
-      name: "Credentials",
       credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
+        email: { label: "ایمیل", type: "email" },
+        password: { label: "رمز عبور", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          return null
+        const email = credentials?.email as string | undefined
+        const password = credentials?.password as string | undefined
+
+        if (!email || !password) return null
+
+        if (!checkRateLimit(email)) {
+          console.log(`[auth] 🚫 RATE LIMIT BLOCK برای: ${email}`)
+          throw new RateLimitSignin()
         }
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email as string },
-        })
-
+        const user = await prisma.user.findUnique({ where: { email } })
         if (!user) {
+          recordFailure(email)
           return null
         }
 
-        const isPasswordValid = await bcrypt.compare(
-          credentials.password as string,
-          user.passwordHash
-        )
-
-        if (!isPasswordValid) {
+        const valid = await bcrypt.compare(password, user.passwordHash)
+        if (!valid) {
+          recordFailure(email)
           return null
         }
 
+        resetRateLimit(email)
         return {
           id: user.id,
           email: user.email,
-          name: user.name,
+          name: user.name ?? undefined,
           role: user.role,
         }
       },
     }),
   ],
+
+  session: {
+    strategy: "jwt",
+    maxAge: 7 * 24 * 60 * 60,
+  },
+
+  pages: {
+    signIn: "/admin/login",
+  },
+
   callbacks: {
     async jwt({ token, user }) {
-      if (user && "role" in user) {
-        token.role = user.role as string
+      if (user) {
         token.id = user.id as string
+        token.role = (user as { role: string }).role
       }
       return token
     },
     async session({ session, token }) {
-      if (session.user && token.role) {
-        session.user.role = token.role as string
+      if (session.user) {
         session.user.id = token.id as string
+        session.user.role = token.role as string
       }
       return session
     },
-  },
-  pages: {
-    signIn: "/admin/login",
-  },
-  session: {
-    strategy: "jwt",
   },
 })

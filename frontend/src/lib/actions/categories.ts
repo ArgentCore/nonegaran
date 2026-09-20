@@ -6,12 +6,14 @@ import { Prisma } from "@prisma/client"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { categorySchema, type CategoryFormValues } from "@/lib/validations/category"
+import { categoryDbErrorMessage } from "@/lib/db-errors"
 
-async function requireAdmin() {
+async function requireAdmin(): Promise<{ error: string } | null> {
   const session = await auth()
   if (!session || session.user?.role !== "admin") {
-    throw new Error("دسترسی غیرمجاز")
+    return { error: "دسترسی غیرمجاز" }
   }
+  return null
 }
 
 function parseCategoryInput(formData: FormData) {
@@ -31,24 +33,6 @@ function toCategoryData(v: CategoryFormValues) {
   }
 }
 
-function dbErrorMessage(e: unknown, op: "create" | "update" | "delete"): string {
-  if (e instanceof Prisma.PrismaClientKnownRequestError) {
-    if (e.code === "P2002") {
-      return "اسلاگ قبلاً استفاده شده است. یک اسلاگ یکتا وارد کنید."
-    }
-    if (e.code === "P2003") {
-      if (op === "delete") {
-        return "این دسته‌بندی کتاب ثبت‌شده دارد و قابل حذف نیست."
-      }
-      return "رکورد انتخاب‌شده وجود ندارد."
-    }
-    if (e.code === "P2025") {
-      return op === "delete" ? "دسته‌بندی موردنظر پیدا نشد." : "رکورد انتخاب‌شده وجود ندارد."
-    }
-  }
-  return "خطایی در ارتباط با پایگاه داده رخ داد. دوباره تلاش کنید."
-}
-
 function revalidateAll() {
   revalidatePath("/admin/categories")
   revalidatePath("/ketabha")
@@ -56,7 +40,8 @@ function revalidateAll() {
 }
 
 export async function createCategory(formData: FormData): Promise<{ error: string } | undefined> {
-  await requireAdmin()
+  const denied = await requireAdmin()
+  if (denied) return denied
   const parsed = parseCategoryInput(formData)
   if (!parsed.success) {
     return { error: parsed.error.issues[0].message }
@@ -65,14 +50,15 @@ export async function createCategory(formData: FormData): Promise<{ error: strin
   try {
     await prisma.category.create({ data })
   } catch (e) {
-    return { error: dbErrorMessage(e, "create") }
+    return { error: categoryDbErrorMessage(e, "create") }
   }
   revalidateAll()
   redirect("/admin/categories")
 }
 
 export async function updateCategory(id: string, formData: FormData): Promise<{ error: string } | undefined> {
-  await requireAdmin()
+  const denied = await requireAdmin()
+  if (denied) return denied
   const parsed = parseCategoryInput(formData)
   if (!parsed.success) {
     return { error: parsed.error.issues[0].message }
@@ -81,18 +67,19 @@ export async function updateCategory(id: string, formData: FormData): Promise<{ 
   try {
     await prisma.category.update({ where: { id }, data })
   } catch (e) {
-    return { error: dbErrorMessage(e, "update") }
+    return { error: categoryDbErrorMessage(e, "update") }
   }
   revalidateAll()
   redirect("/admin/categories")
 }
 
 export async function deleteCategory(id: string): Promise<{ error: string } | undefined> {
-  await requireAdmin()
+  const denied = await requireAdmin()
+  if (denied) return denied
   try {
     await prisma.category.delete({ where: { id } })
   } catch (e) {
-    return { error: dbErrorMessage(e, "delete") }
+    return { error: categoryDbErrorMessage(e, "delete") }
   }
   revalidateAll()
 }
