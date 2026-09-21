@@ -1,6 +1,9 @@
 import Link from "next/link";
-import { ShoppingBag, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
+import { CartBadge } from "@/components/cart/CartBadge";
+import { CartRefresher } from "@/components/cart/CartRefresher";
+import { auth, signOut } from "@/auth";
 
 const primaryNav = [
   { href: "/ketabha", label: "کتاب‌ها" },
@@ -9,9 +12,12 @@ const primaryNav = [
   { href: "/vaghti", label: "وقتی" },
 ];
 
-export default function Header() {
+export default async function Header() {
+  const session = await auth();
+
   return (
     <header className="border-b border-[var(--hairline)] bg-[var(--background)] sticky top-0 z-40">
+      <CartRefresher />
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-6 py-5">
         <Link href="/" className="font-display text-2xl hover:text-[var(--link)] transition-colors">
           نونگاران
@@ -35,13 +41,29 @@ export default function Header() {
           >
             <Search size={20} aria-hidden />
           </Link>
-          <Link
-            href="/sabad-kharid"
-            aria-label="سبد خرید"
-            className="p-2 rounded-[var(--radius-control)] hover:bg-[var(--surface-raised)] transition-colors"
-          >
-            <ShoppingBag size={20} aria-hidden />
-          </Link>
+          <CartBadge />
+          {session?.user ? (
+            <form
+              action={async () => {
+                "use server";
+                await signOut({ redirectTo: "/" });
+              }}
+            >
+              <button
+                type="submit"
+                className="rounded-[var(--radius-control)] border border-[var(--hairline)] px-3 py-1.5 text-xs hover:bg-[var(--surface-raised)] transition-colors"
+              >
+                خروج ({session.user.name ?? session.user.email ?? "کاربر"})
+              </button>
+            </form>
+          ) : (
+            <Link
+              href="/vorood"
+              className="rounded-[var(--radius-control)] border border-[var(--hairline)] px-3 py-1.5 text-xs hover:bg-[var(--surface-raised)] transition-colors"
+            >
+              ورود / ثبت‌نام
+            </Link>
+          )}
           <ThemeToggle />
         </div>
       </div>

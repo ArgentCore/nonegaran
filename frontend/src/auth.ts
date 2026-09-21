@@ -27,7 +27,6 @@ function recordFailure(email: string) {
   const entry = rateLimit.get(email)
   if (entry) {
     entry.count += 1
-    console.log(`[auth] تلاش ناموفق #${entry.count} برای: ${email}`)
   }
 }
 
@@ -49,7 +48,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!email || !password) return null
 
         if (!checkRateLimit(email)) {
-          console.log(`[auth] 🚫 RATE LIMIT BLOCK برای: ${email}`)
           throw new RateLimitSignin()
         }
 
@@ -66,6 +64,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
 
         resetRateLimit(email)
+
+        // lazy import — فقط در authorize (Node runtime) اجرا می‌شود، نه middleware (Edge)
+        try {
+          const { mergeGuestCartToUser } = await import("@/lib/cart-server")
+          await mergeGuestCartToUser(user.id)
+        } catch (e) {
+          console.error("[auth] cart merge failed:", e)
+        }
+
         return {
           id: user.id,
           email: user.email,

@@ -1,22 +1,27 @@
-﻿import type { Metadata } from "next";
+import { auth } from "@/auth"
+import { getActiveCart } from "@/lib/cart-server"
+import { CartItemList } from "@/components/cart/CartItemList"
 
-export const metadata: Metadata = {
-  title: "سبد خرید",
-  description: "سبد خرید نونگاران؛ خرید آنلاین هنوز فعال نشده است.",
-};
+export const metadata = {
+  title: "سبد خرید | نونگاران",
+  description: "مدیریت سبد خرید و ادامه فرآیند خرید",
+}
 
-export default function CartPage() {
+export default async function CartPage() {
+  const session = await auth()
+  const cart = await getActiveCart(session?.user?.id ?? null)
+
   return (
-    <div className="mx-auto max-w-3xl px-6 py-16">
-      <h1 className="font-display text-4xl mb-8">سبد خرید</h1>
-      <div className="flex flex-col gap-6 text-lg leading-8">
-        <p className="font-display text-3xl leading-[1.7] mb-8">
-          سبد خرید شما در حال حاضر خالی است.
-        </p>
-        <p className="leading-8 text-[var(--foreground)] max-w-[65ch] mb-6">
-          سامانه‌ی خرید آنلاین و درگاه پرداخت در فازهای بعدی راه‌اندازی خواهد شد. تا آن زمان، می‌توانید فهرست کتاب‌های مورد علاقه‌ی خود را از بخش «کتاب‌ها» مرور کنید.
-        </p>
+    <div className="mx-auto max-w-4xl px-6 py-12">
+      <h1 className="font-display text-3xl">سبد خرید</h1>
+      <p className="mt-1 text-sm text-[var(--text-muted)]">
+        {cart.items.length === 0
+          ? "هنوز کتابی انتخاب نکرده‌اید"
+          : `${cart.items.length.toLocaleString("fa-IR")} عنوان در سبد شما`}
+      </p>
+      <div className="mt-8">
+        <CartItemList cart={cart} />
       </div>
     </div>
-  );
+  )
 }

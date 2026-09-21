@@ -105,3 +105,8 @@
 - فاز 4 سبد خرید / Checkout / سفارش‌ها: بعدی
 - فاز 5 ادمین submissions و newsletter: آینده
 - فاز 6 پرداخت واقعی، polish، deploy: آینده
+## ۱۱) درس‌های فاز 4A (سبد خرید)
+11. ماژول‌های server-only (cookies، node:crypto، Prisma) هرگز static از زنجیره middleware/auth import نشوند (Edge Runtime). راه‌حل: split به cart-core (pure) و cart-server (server-only) + lazy import داخل authorize.
+12. Badge کلاینتی داخل layout بین navigationها remount نمی‌شود و عدد کهنه نشان می‌دهد. راه‌حل: Badge سروری + CartRefresher که با رویداد cart-updated فراخوان router.refresh() می‌کند.
+13. صفحه login غیر از pages.signIn باید signIn را با redirect: false صدا بزند و خطا را inline نشان دهد؛ وگرنه NextAuth کاربر را به pages.signIn پرتاب می‌کند.
+14. قبل از سناریوهای تست دستی، داده‌ها را پاک کن تا اعداد قابل پیش‌بینی باشند (scripts/clear-carts.ts).

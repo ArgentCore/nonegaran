@@ -5,6 +5,7 @@ import { ChevronLeft, BookOpen, Calendar, Ruler, Hash } from "lucide-react";
 import { getBookBySlug, getBooks } from "@/lib/data/books";
 import { toOldBook, toOldBooks } from "@/lib/data/mapper";
 import { formatToman } from "@/lib/format";
+import { AddToCartButton } from "@/components/cart/AddToCartButton";
 
 const toneMap: Record<string, string> = {
   saffron: "var(--color-saffron)",
@@ -125,15 +126,16 @@ export default async function BookDetailPage({ params }: PageProps) {
               )}
             </div>
 
-            <button
-              disabled={!book.inStock}
-              className="w-full bg-[var(--foreground)] text-[var(--background)] py-3 rounded-[var(--radius-control)] font-medium transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {book.inStock ? "افزودن به سبد خرید" : "ناموجود"}
-            </button>
-            <p className="text-xs text-center text-[var(--text-muted)]">
-              امکان خرید آنلاین در فازهای بعدی فعال می‌شود.
-            </p>
+            {book.inStock ? (
+              <AddToCartButton bookId={dbBook.id} className="w-full" />
+            ) : (
+              <button
+                disabled
+                className="w-full bg-[var(--foreground)] text-[var(--background)] py-3 rounded-[var(--radius-control)] font-medium transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                ناموجود
+              </button>
+            )}
           </div>
 
           {book.description && (
@@ -153,10 +155,12 @@ export default async function BookDetailPage({ params }: PageProps) {
                   <dd className="ltr-run">{book.pages}</dd>
                 </div>
               )}
-              <div className="flex items-center gap-2">
-                <Ruler size={16} className="text-[var(--text-muted)]" aria-hidden />
-                <dt className="text-[var(--text-muted)]">قطع:</dt>
-                <dd>{book.bookSize}</dd>
+              <div className="flex flex-col gap-2 sm:flex-col">
+                <div className="flex items-center gap-2">
+                  <Ruler size={16} className="text-[var(--text-muted)]" aria-hidden />
+                  <dt className="text-[var(--text-muted)]">قطع:</dt>
+                  <dd>{book.bookSize}</dd>
+                </div>
               </div>
               <div className="flex items-center gap-2">
                 <Calendar size={16} className="text-[var(--text-muted)]" aria-hidden />
