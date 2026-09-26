@@ -1,5 +1,5 @@
 import { auth } from "@/auth"
-import { getActiveCart } from "@/lib/cart-server"
+import { getActiveCartForRender } from "@/lib/cart-server"
 import { CartItemList } from "@/components/cart/CartItemList"
 
 export const metadata = {
@@ -9,7 +9,7 @@ export const metadata = {
 
 export default async function CartPage() {
   const session = await auth()
-  const cart = await getActiveCart(session?.user?.id ?? null)
+  const cart = await getActiveCartForRender(session?.user?.id ?? null)
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-12">

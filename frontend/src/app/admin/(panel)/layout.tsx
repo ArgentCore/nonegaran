@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { auth, signOut } from "@/auth"
 import { redirect } from "next/navigation"
+import { prisma } from "@/lib/prisma"
 
 export default async function AdminLayout({
   children,
@@ -13,9 +14,12 @@ export default async function AdminLayout({
     redirect("/admin/login")
   }
 
+  const pendingOrdersCount = await prisma.order.count({
+    where: { status: "pending" },
+  })
+
   return (
     <div className="flex min-h-screen bg-[var(--background)]">
-      {/* Sidebar */}
       <aside className="w-64 border-l border-[var(--hairline)] bg-[var(--surface-raised)] p-6">
         <div className="mb-8">
           <h1 className="font-display text-2xl">پنل مدیریت</h1>
@@ -47,6 +51,17 @@ export default async function AdminLayout({
           >
             دسته‌بندی‌ها
           </Link>
+          <Link
+            href="/admin/orders"
+            className="flex items-center justify-between rounded-[var(--radius-control)] px-4 py-2 text-sm hover:bg-[var(--background)] transition-colors"
+          >
+            سفارش‌ها
+            {pendingOrdersCount > 0 && (
+              <span className="rounded-full bg-[var(--color-saffron)] px-2 py-0.5 text-[10px] font-medium text-[var(--color-ink)] tabular-nums">
+                {pendingOrdersCount.toLocaleString("fa-IR")}
+              </span>
+            )}
+          </Link>
         </nav>
 
         <div className="mt-8 border-t border-[var(--hairline)] pt-4">
@@ -69,7 +84,6 @@ export default async function AdminLayout({
         </div>
       </aside>
 
-      {/* Main content */}
       <main className="flex-1 p-8">{children}</main>
     </div>
   )

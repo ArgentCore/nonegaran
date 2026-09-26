@@ -1,6 +1,5 @@
 import { cookies } from "next/headers"
 import { prisma } from "@/lib/prisma"
-// randomUUID از globalThis.crypto (Web Crypto API) استفاده می‌شود
 import { cartInclude, type CartWithItems } from "./cart-core"
 
 export type { CartWithItems }
@@ -23,6 +22,10 @@ async function setSessionCookie(sessionId: string): Promise<void> {
     maxAge: COOKIE_MAX_AGE,
     path: "/",
   })
+}
+
+function emptyCart(): CartWithItems {
+  return { id: "", items: [] } as CartWithItems
 }
 
 async function getOrCreateGuestCart(): Promise<CartWithItems> {
@@ -53,6 +56,23 @@ export async function getActiveCart(userId?: string | null): Promise<CartWithIte
     return getOrCreateUserCart(userId)
   }
   return getOrCreateGuestCart()
+}
+
+export async function getActiveCartForRender(userId?: string | null): Promise<CartWithItems> {
+  if (userId) {
+    const cart = await prisma.cart.findUnique({
+      where: { userId },
+      include: cartInclude,
+    })
+    return cart ?? emptyCart()
+  }
+  const sessionId = await getSessionId()
+  if (!sessionId) return emptyCart()
+  const cart = await prisma.cart.findUnique({
+    where: { sessionId },
+    include: cartInclude,
+  })
+  return cart ?? emptyCart()
 }
 
 export async function mergeGuestCartToUser(userId: string): Promise<void> {

@@ -31,6 +31,13 @@ export default async function Header() {
                 </Link>
               </li>
             ))}
+            {session?.user && (
+              <li>
+                <Link href="/sefaresh-ha" className="hover:text-[var(--link)] transition-colors">
+                  سفارش‌های من
+                </Link>
+              </li>
+            )}
           </ul>
         </nav>
         <div className="flex items-center gap-2">

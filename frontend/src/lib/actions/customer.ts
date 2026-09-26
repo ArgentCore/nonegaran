@@ -5,6 +5,8 @@ import { Prisma } from "@prisma/client"
 import bcrypt from "bcryptjs"
 import { customerRegisterSchema } from "@/lib/validations/customer"
 
+const UNACTIVATED_HASH = "!unactivated"
+
 export async function registerCustomer(
   formData: FormData
 ): Promise<{ error?: string }> {
@@ -19,6 +21,24 @@ export async function registerCustomer(
   }
 
   const passwordHash = await bcrypt.hash(parsed.data.password, 10)
+
+  const existing = await prisma.user.findUnique({
+    where: { email: parsed.data.email },
+  })
+
+  if (existing) {
+    if (existing.passwordHash !== UNACTIVATED_HASH) {
+      return { error: "این ایمیل قبلاً ثبت شده است. وارد شوید." }
+    }
+    await prisma.user.update({
+      where: { id: existing.id },
+      data: {
+        passwordHash,
+        name: parsed.data.name || existing.name,
+      },
+    })
+    return {}
+  }
 
   try {
     await prisma.user.create({

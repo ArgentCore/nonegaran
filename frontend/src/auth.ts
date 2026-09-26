@@ -57,6 +57,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return null
         }
 
+        if (!user.passwordHash.startsWith("$2")) return null
+
         const valid = await bcrypt.compare(password, user.passwordHash)
         if (!valid) {
           recordFailure(email)
