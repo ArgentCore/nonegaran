@@ -25,7 +25,14 @@ async function setSessionCookie(sessionId: string): Promise<void> {
 }
 
 function emptyCart(): CartWithItems {
-  return { id: "", items: [] } as CartWithItems
+  return {
+    id: "",
+    userId: null,
+    sessionId: null,
+    items: [],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  } as unknown as CartWithItems
 }
 
 async function getOrCreateGuestCart(): Promise<CartWithItems> {
