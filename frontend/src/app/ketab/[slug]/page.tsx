@@ -6,6 +6,7 @@ import { getBookBySlug, getBooks } from "@/lib/data/books";
 import { toOldBook, toOldBooks } from "@/lib/data/mapper";
 import { formatToman } from "@/lib/format";
 import { AddToCartButton } from "@/components/cart/AddToCartButton";
+import { ReviewsSection } from "@/components/reviews/ReviewsSection"
 
 const toneMap: Record<string, string> = {
   saffron: "var(--color-saffron)",
@@ -176,6 +177,8 @@ export default async function BookDetailPage({ params }: PageProps) {
               )}
             </dl>
           </section>
+
+      <ReviewsSection bookId={dbBook.id} />
         </div>
       </div>
     </div>

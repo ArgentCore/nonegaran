@@ -18,6 +18,10 @@ export default async function AdminLayout({
     where: { status: "pending" },
   })
 
+  const pendingReviewsCount = await prisma.review.count({
+    where: { status: "pending" },
+  })
+
   return (
     <div className="flex min-h-screen bg-[var(--background)]">
       <aside className="w-64 border-l border-[var(--hairline)] bg-[var(--surface-raised)] p-6">
@@ -50,6 +54,17 @@ export default async function AdminLayout({
             className="block rounded-[var(--radius-control)] px-4 py-2 text-sm hover:bg-[var(--background)] transition-colors"
           >
             دسته‌بندی‌ها
+          </Link>
+          <Link
+            href="/admin/reviews"
+            className="flex items-center justify-between rounded-[var(--radius-control)] px-4 py-2 text-sm hover:bg-[var(--background)] transition-colors"
+          >
+            نظرات
+            {pendingReviewsCount > 0 && (
+              <span className="rounded-full bg-[var(--color-clay)] px-2 py-0.5 text-[10px] font-medium text-[var(--color-paper)] tabular-nums">
+                {pendingReviewsCount.toLocaleString("fa-IR")}
+              </span>
+            )}
           </Link>
           <Link
             href="/admin/discounts"

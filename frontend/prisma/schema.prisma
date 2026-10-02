@@ -98,6 +98,7 @@ model Book {
   inStock     Boolean    @default(true)
   isPreorder  Boolean    @default(false)
   cartItems   CartItem[]
+  reviews       Review[]
   orderItems  OrderItem[]
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
@@ -119,6 +120,7 @@ model User {
   savedAddresses Json?
   orders       Order[]
   assignedDiscounts DiscountCode[] @relation("userAssignedDiscounts")
+  reviews       Review[]
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 }
@@ -222,4 +224,26 @@ model DiscountCode {
 
   @@index([code])
   @@index([isActive])
+}
+enum ReviewStatus {
+  pending
+  approved
+  rejected
+}
+
+model Review {
+  id        String       @id @default(uuid())
+  bookId    String
+  book      Book         @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rating    Int
+  title     String?
+  body      String?
+  status    ReviewStatus @default(pending)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@unique([bookId, userId])
+  @@index([bookId, status])
 }
