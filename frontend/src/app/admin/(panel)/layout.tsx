@@ -22,6 +22,10 @@ export default async function AdminLayout({
     where: { status: "pending" },
   })
 
+  const queuedEmailsCount = await prisma.emailLog.count({
+    where: { status: "queued" },
+  })
+
   return (
     <div className="flex min-h-screen bg-[var(--background)]">
       <aside className="w-64 border-l border-[var(--hairline)] bg-[var(--surface-raised)] p-6">
@@ -54,6 +58,17 @@ export default async function AdminLayout({
             className="block rounded-[var(--radius-control)] px-4 py-2 text-sm hover:bg-[var(--background)] transition-colors"
           >
             دسته‌بندی‌ها
+          </Link>
+          <Link
+            href="/admin/emails"
+            className="flex items-center justify-between rounded-[var(--radius-control)] px-4 py-2 text-sm hover:bg-[var(--background)] transition-colors"
+          >
+            ایمیل‌ها
+            {queuedEmailsCount > 0 && (
+              <span className="rounded-full bg-[var(--color-saffron)] px-2 py-0.5 text-[10px] font-medium text-[var(--color-ink)] tabular-nums">
+                {queuedEmailsCount.toLocaleString("fa-IR")}
+              </span>
+            )}
           </Link>
           <Link
             href="/admin/reviews"

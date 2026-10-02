@@ -12,6 +12,7 @@ import {
   getUserUsageCount,
 } from "@/lib/data/discounts"
 import { issueGiftCoupon } from "@/lib/actions/discount"
+import { sendOrderConfirmedEmail } from "@/lib/email-sender"
 
 export async function createOrder(formData: FormData) {
   const parsed = checkoutSchema.safeParse({
@@ -133,7 +134,29 @@ export async function createOrder(formData: FormData) {
   revalidatePath("/")
   revalidatePath("/sefaresh-ha")
   revalidatePath("/admin/discounts")
-  redirect(`/sefaresh/thank-you/${orderId}`)
+  
+  // ایمیل تأیید سفارش (fire-and-forget)
+  const userEmail = parsed.data.contactEmail
+  if (userEmail) {
+    const customerUser = await prisma.user.findUnique({ where: { id: userId } })
+    const customerName = customerUser?.name || "مشتری عزیز"
+    sendOrderConfirmedEmail({
+      to: userEmail,
+      orderId,
+      orderNumber: orderId.slice(0, 8),
+      customerName,
+      totalAmount: finalTotal.toLocaleString("fa-IR"),
+      items: orderItems.map((i) => {
+        const b = booksMap.get(i.bookId)!
+        return {
+          title: b.title,
+          quantity: i.quantity,
+          subtotal: i.subtotal.toLocaleString("fa-IR"),
+        }
+      }),
+    })
+  }
+redirect(`/sefaresh/thank-you/${orderId}`)
 }
 
 async function getOrCreateGuestUser(email: string) {

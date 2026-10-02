@@ -159,6 +159,7 @@ model Order {
   paymentRefId    String?
   appliedDiscountId  String?
   appliedDiscount    DiscountCode? @relation(fields: [appliedDiscountId], references: [id])
+  emailLogs     EmailLog[]
   discountAmount     Int           @default(0)
   shippingAddress Json?
   items           OrderItem[]
@@ -246,4 +247,29 @@ model Review {
 
   @@unique([bookId, userId])
   @@index([bookId, status])
+}
+enum EmailStatus {
+  queued
+  sent
+  failed
+}
+
+model EmailLog {
+  id         String      @id @default(uuid())
+  to         String
+  subject    String
+  html       String
+  template   String?
+  status     EmailStatus @default(queued)
+  attempts   Int         @default(0)
+  error      String?
+  orderId    String?
+  order      Order?      @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  sentAt     DateTime?
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  @@index([status])
+  @@index([orderId])
+  @@index([createdAt])
 }
