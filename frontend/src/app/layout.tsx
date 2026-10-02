@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import { Providers } from "@/components/Providers"
 
 const vazirmatn = localFont({
   src: "../fonts/Vazirmatn-Variable.woff2",
@@ -45,7 +46,7 @@ export default function RootLayout({
         </a>
         <Header />
         <main id="main-content" className="flex-grow">
-          {children}
+          <Providers>{children}</Providers>
         </main>
         <Footer />
       </body>

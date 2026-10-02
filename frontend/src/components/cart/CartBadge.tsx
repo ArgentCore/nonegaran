@@ -1,8 +1,24 @@
+"use client"
+
 import Link from "next/link"
+import { useState, useEffect } from "react"
 import { getCartCount } from "@/lib/actions/cart"
 
-export async function CartBadge() {
-  const count = await getCartCount()
+export function CartBadge() {
+  const [count, setCount] = useState(0)
+
+  useEffect(() => {
+    // دریافت تعداد سبد خرید در سمت کلاینت
+    getCartCount().then(setCount)
+    
+    // گوش دادن به رویداد به‌روزرسانی سبد خرید
+    const handler = () => {
+      getCartCount().then(setCount)
+    }
+    window.addEventListener("cart-updated", handler)
+    
+    return () => window.removeEventListener("cart-updated", handler)
+  }, [])
 
   return (
     <Link
