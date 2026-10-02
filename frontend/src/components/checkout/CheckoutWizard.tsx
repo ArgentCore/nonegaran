@@ -2,10 +2,13 @@
 
 import { useState, useTransition } from "react"
 import { createOrder } from "@/lib/actions/order"
+import { validateDiscountCode } from "@/lib/actions/discount"
 import { AddressForm } from "./AddressForm"
 import { ReviewStep } from "./ReviewStep"
+import { cartTotal } from "@/lib/cart-core"
 import type { CartWithItems } from "@/lib/cart-core"
 import type { ShippingAddress } from "@/lib/validations/order"
+import type { DiscountCalculation } from "@/lib/data/discounts"
 
 interface CheckoutWizardProps {
   cart: CartWithItems
@@ -20,6 +23,7 @@ export function CheckoutWizard({ cart, contactEmail, savedAddresses }: CheckoutW
   const [address, setAddress] = useState<ShippingAddress | null>(null)
   const [saveAddress, setSaveAddress] = useState(false)
   const [emailState, setEmailState] = useState(contactEmail)
+  const [appliedDiscount, setAppliedDiscount] = useState<DiscountCalculation | null>(null)
   const [error, setError] = useState("")
   const [isPending, startTransition] = useTransition()
 
@@ -30,6 +34,18 @@ export function CheckoutWizard({ cart, contactEmail, savedAddresses }: CheckoutW
     setSaveAddress(save)
     if (emailFromForm) setEmailState(emailFromForm)
     setStep(1)
+  }
+
+  async function handleApplyDiscount(code: string): Promise<DiscountCalculation> {
+    const result = await validateDiscountCode(code, cartTotal(cart))
+    if (result.valid) {
+      setAppliedDiscount(result)
+    }
+    return result
+  }
+
+  function handleRemoveDiscount() {
+    setAppliedDiscount(null)
   }
 
   function handleConfirm() {
@@ -45,6 +61,7 @@ export function CheckoutWizard({ cart, contactEmail, savedAddresses }: CheckoutW
     formData.append("city", address.city)
     formData.append("addressLine", address.addressLine)
     formData.append("postalCode", address.postalCode)
+    formData.append("discountCode", appliedDiscount?.code ?? "")
 
     startTransition(async () => {
       const result = await createOrder(formData)
@@ -94,6 +111,9 @@ export function CheckoutWizard({ cart, contactEmail, savedAddresses }: CheckoutW
           address={address}
           contactEmail={emailState}
           saveAddress={saveAddress}
+          appliedDiscount={appliedDiscount}
+          onApplyDiscount={handleApplyDiscount}
+          onRemoveDiscount={handleRemoveDiscount}
           onBack={() => setStep(0)}
           onConfirm={handleConfirm}
         />

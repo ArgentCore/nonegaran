@@ -118,6 +118,7 @@ model User {
   cart         Cart?
   savedAddresses Json?
   orders       Order[]
+  assignedDiscounts DiscountCode[] @relation("userAssignedDiscounts")
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 }
@@ -154,6 +155,9 @@ model Order {
   totalAmount     Int
   paymentMethod   String?
   paymentRefId    String?
+  appliedDiscountId  String?
+  appliedDiscount    DiscountCode? @relation(fields: [appliedDiscountId], references: [id])
+  discountAmount     Int           @default(0)
   shippingAddress Json?
   items           OrderItem[]
   createdAt       DateTime    @default(now())
@@ -192,4 +196,30 @@ model NewsletterSubscriber {
   email           String    @unique
   subscribedAt    DateTime  @default(now())
   unsubscribedAt  DateTime?
+}
+enum DiscountType {
+  percentage
+  fixed
+}
+model DiscountCode {
+  id             String       @id @default(uuid())
+  code           String       @unique
+  type           DiscountType
+  value          Int
+  minOrderAmount Int?
+  maxDiscount    Int?
+  usageLimit     Int?
+  usageCount     Int          @default(0)
+  userLimit      Int?
+  userId         String?
+  user           User?        @relation("userAssignedDiscounts", fields: [userId], references: [id])
+  startsAt       DateTime?
+  expiresAt      DateTime?
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  orders         Order[]
+
+  @@index([code])
+  @@index([isActive])
 }

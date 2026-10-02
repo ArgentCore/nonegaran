@@ -1,6 +1,5 @@
-import { notFound, redirect } from "next/navigation"
+import { notFound } from "next/navigation"
 import Link from "next/link"
-import { auth } from "@/auth"
 import { getOrderByIdForAdmin, orderStatusLabels } from "@/lib/data/orders"
 import { OrderTimeline } from "@/components/orders/OrderTimeline"
 import { updateOrderStatus } from "@/lib/actions/admin-order"
@@ -23,9 +22,6 @@ const allStatuses: OrderStatus[] = [
 
 export default async function AdminOrderDetailPage({ params }: PageProps) {
   const { id } = await params
-  const session = await auth()
-  if (!session?.user || session.user.role !== "admin") redirect("/")
-
   const order = await getOrderByIdForAdmin(id)
   if (!order) notFound()
 

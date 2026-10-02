@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import { getOrderById } from "@/lib/data/orders"
+import { getDiscountByCode } from "@/lib/data/discounts"
 import { auth } from "@/auth"
 
 interface PageProps {
@@ -14,6 +15,8 @@ export default async function ThankYouPage({ params }: PageProps) {
 
   if (!order) notFound()
   if (session?.user?.id && order.userId !== session.user.id) notFound()
+
+  const gift = await getDiscountByCode(`GIFT-${order.id.slice(0, 8).toUpperCase()}`)
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-16 text-center">
@@ -35,6 +38,11 @@ export default async function ThankYouPage({ params }: PageProps) {
             {order.totalAmount.toLocaleString("fa-IR")} تومان
           </span>
         </div>
+        {order.discountAmount > 0 && (
+          <p className="mt-2 text-sm text-[var(--color-moss)]">
+            ✓ شامل {(order.discountAmount).toLocaleString("fa-IR")} تومان تخفیف
+          </p>
+        )}
         <div className="mt-3 space-y-2 text-sm">
           {order.items.map((item) => (
             <div key={item.id} className="flex justify-between">
@@ -44,6 +52,16 @@ export default async function ThankYouPage({ params }: PageProps) {
           ))}
         </div>
       </div>
+
+      {gift && (
+        <div className="mt-6 rounded-[var(--radius-control)] border-2 border-dashed border-[var(--color-saffron)] bg-[var(--color-saffron)]/10 p-6 text-right">
+          <p className="text-sm text-[var(--text-muted)]">🎁 هدیه این خرید شما:</p>
+          <p className="mt-2 font-mono text-2xl font-bold tracking-wider">{gift.code}</p>
+          <p className="mt-1 text-sm">
+            {gift.value}٪ تخفیف برای سفارش بعدی — معتبر تا ۱۴ روز
+          </p>
+        </div>
+      )}
 
       <div className="mt-8 flex flex-col gap-3 sm:flex-row">
         <Link

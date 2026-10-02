@@ -1,6 +1,4 @@
-import { redirect } from "next/navigation"
 import Link from "next/link"
-import { auth } from "@/auth"
 import { getAllOrdersForAdmin, orderStatusLabels } from "@/lib/data/orders"
 
 export const metadata = {
@@ -8,9 +6,6 @@ export const metadata = {
 }
 
 export default async function AdminOrdersPage() {
-  const session = await auth()
-  if (!session?.user || session.user.role !== "admin") redirect("/")
-
   const orders = await getAllOrdersForAdmin()
 
   return (

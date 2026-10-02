@@ -6,6 +6,12 @@ import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { checkoutSchema } from "@/lib/validations/order"
 import { getActiveCart } from "@/lib/cart-server"
+import {
+  calculateDiscount,
+  getDiscountByCode,
+  getUserUsageCount,
+} from "@/lib/data/discounts"
+import { issueGiftCoupon } from "@/lib/actions/discount"
 
 export async function createOrder(formData: FormData) {
   const parsed = checkoutSchema.safeParse({
@@ -70,6 +76,25 @@ export async function createOrder(formData: FormData) {
     userId = guest.id
   }
 
+  let discountAmount = 0
+  let appliedDiscountId: string | null = null
+  const discountCodeInput = String(formData.get("discountCode") ?? "")
+    .trim()
+    .toUpperCase()
+
+  if (discountCodeInput) {
+    const discount = await getDiscountByCode(discountCodeInput)
+    if (discount && (!discount.userId || discount.userId === userId)) {
+      const userUsage = await getUserUsageCount(discount.id, userId)
+      const calculation = calculateDiscount(discount, totalAmount, userUsage)
+      if (calculation.valid && calculation.discountAmount) {
+        discountAmount = calculation.discountAmount
+        appliedDiscountId = discount.id
+      }
+    }
+  }
+
+  const finalTotal = totalAmount - discountAmount
   let orderId = ""
 
   try {
@@ -77,13 +102,22 @@ export async function createOrder(formData: FormData) {
       data: {
         userId,
         status: "pending",
-        totalAmount,
+        totalAmount: finalTotal,
+        discountAmount,
+        appliedDiscountId,
         paymentMethod: "mock",
         shippingAddress: parsed.data.shippingAddress,
         items: { create: orderItems },
       },
     })
     orderId = order.id
+
+    if (appliedDiscountId) {
+      await prisma.discountCode.update({
+        where: { id: appliedDiscountId },
+        data: { usageCount: { increment: 1 } },
+      })
+    }
 
     await prisma.cartItem.deleteMany({ where: { cartId: cart.id } })
 
@@ -94,8 +128,11 @@ export async function createOrder(formData: FormData) {
     return { error: "خطایی در ثبت سفارش رخ داد. دوباره تلاش کنید." }
   }
 
+  await issueGiftCoupon(orderId)
+
   revalidatePath("/")
   revalidatePath("/sefaresh-ha")
+  revalidatePath("/admin/discounts")
   redirect(`/sefaresh/thank-you/${orderId}`)
 }
 

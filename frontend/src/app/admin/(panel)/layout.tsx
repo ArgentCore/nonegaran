@@ -52,6 +52,12 @@ export default async function AdminLayout({
             دسته‌بندی‌ها
           </Link>
           <Link
+            href="/admin/discounts"
+            className="block rounded-[var(--radius-control)] px-4 py-2 text-sm hover:bg-[var(--background)] transition-colors"
+          >
+            کدهای تخفیف
+          </Link>
+          <Link
             href="/admin/orders"
             className="flex items-center justify-between rounded-[var(--radius-control)] px-4 py-2 text-sm hover:bg-[var(--background)] transition-colors"
           >
