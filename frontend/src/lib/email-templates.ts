@@ -1,12 +1,15 @@
 import type { EmailTemplateName } from "@/lib/validations/email"
 
 interface TemplateData {
-  orderNumber: string
+  orderNumber?: string
   customerName: string
-  totalAmount: string
-  items: { title: string; quantity: number; subtotal: string }[]
+  totalAmount?: string
+  items?: { title: string; quantity: number; subtotal: string }[]
   shippingAddress?: string
   trackingUrl?: string
+  bookTitle?: string
+  bookUrl?: string
+  price?: string
 }
 
 const brandColors = {
@@ -63,7 +66,7 @@ function shell(body: string): string {
 }
 
 function renderItems(data: TemplateData): string {
-  const rows = data.items
+  const rows = (data.items ?? [])
     .map(
       (i) => `
       <tr>
@@ -128,6 +131,24 @@ export function renderEmailTemplate(
       `
       return {
         subject: `سفارش ${data.orderNumber} تحویل داده شد — نونگاران`,
+        html: shell(body),
+      }
+    }
+
+    case "back-in-stock": {
+      const body = `
+        <p class="greeting">سلام ${data.customerName} عزیز،</p>
+        <p>خبر خوب! کتابی که به علاقه‌مندی‌های خود اضافه کرده بودید دوباره موجود شد. <span class="badge">موجود شد</span></p>
+        <div class="card">
+          <h3>عنوان کتاب</h3>
+          <p><strong>${data.bookTitle}</strong></p>
+          ${data.price ? `<p class="total" style="margin-top: 8px;">${data.price} تومان</p>` : ""}
+        </div>
+        ${data.bookUrl ? `<a href="${data.bookUrl}" class="cta">مشاهده و خرید</a>` : ""}
+        <p>تعداد محدود است، زودتر سفارش دهید!</p>
+      `
+      return {
+        subject: `${data.bookTitle} دوباره موجود شد — نونگاران`,
         html: shell(body),
       }
     }

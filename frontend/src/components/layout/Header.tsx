@@ -4,6 +4,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import { CartBadge } from "@/components/cart/CartBadge";
 import { CartRefresher } from "@/components/cart/CartRefresher";
 import { auth, signOut } from "@/auth";
+import { WishlistNavLink } from "@/components/wishlist/WishlistNavLink"
 
 const primaryNav = [
   { href: "/ketabha", label: "کتاب‌ها" },
@@ -32,11 +33,16 @@ export default async function Header() {
               </li>
             ))}
             {session?.user && (
-              <li>
-                <Link href="/sefaresh-ha" className="hover:text-[var(--link)] transition-colors">
-                  سفارش‌های من
-                </Link>
-              </li>
+              <>
+                <li>
+                  <WishlistNavLink />
+                </li>
+                <li>
+                  <Link href="/sefaresh-ha" className="hover:text-[var(--link)] transition-colors">
+                    سفارش‌های من
+                  </Link>
+                </li>
+              </>
             )}
           </ul>
         </nav>

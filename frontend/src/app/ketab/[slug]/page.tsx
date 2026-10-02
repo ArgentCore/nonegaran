@@ -7,6 +7,9 @@ import { toOldBook, toOldBooks } from "@/lib/data/mapper";
 import { formatToman } from "@/lib/format";
 import { AddToCartButton } from "@/components/cart/AddToCartButton";
 import { ReviewsSection } from "@/components/reviews/ReviewsSection"
+import { WishlistButton } from "@/components/wishlist/WishlistButton"
+import { auth } from "@/auth"
+import { isBookInWishlist } from "@/lib/data/wishlist"
 
 const toneMap: Record<string, string> = {
   saffron: "var(--color-saffron)",
@@ -58,6 +61,10 @@ export default async function BookDetailPage({ params }: PageProps) {
   if (!dbBook) {
     notFound();
   }
+
+  const session = await auth();
+  const userId = session?.user?.id ?? null;
+  const isInWishlist = userId ? await isBookInWishlist(userId, dbBook.id) : false;
 
   const book = toOldBook(dbBook);
 
@@ -128,7 +135,14 @@ export default async function BookDetailPage({ params }: PageProps) {
             </div>
 
             {book.inStock ? (
+              <div className="flex gap-2">
+              <WishlistButton
+                bookId={dbBook.id}
+                initialInWishlist={isInWishlist}
+                size="lg"
+              />
               <AddToCartButton bookId={dbBook.id} className="w-full" />
+            </div>
             ) : (
               <button
                 disabled

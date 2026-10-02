@@ -99,6 +99,7 @@ model Book {
   isPreorder  Boolean    @default(false)
   cartItems   CartItem[]
   reviews       Review[]
+  wishlist    Wishlist[]
   orderItems  OrderItem[]
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
@@ -120,6 +121,7 @@ model User {
   savedAddresses Json?
   orders       Order[]
   assignedDiscounts DiscountCode[] @relation("userAssignedDiscounts")
+  wishlist    Wishlist[]
   reviews       Review[]
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
@@ -272,4 +274,16 @@ model EmailLog {
   @@index([status])
   @@index([orderId])
   @@index([createdAt])
+}
+model Wishlist {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookId    String
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, bookId])
+  @@index([userId])
+  @@index([bookId])
 }

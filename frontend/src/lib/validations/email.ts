@@ -4,6 +4,7 @@ export const emailTemplateNameSchema = z.enum([
   "order-confirmed",
   "order-shipped",
   "order-delivered",
+  "back-in-stock",
 ])
 
 export type EmailTemplateName = z.infer<typeof emailTemplateNameSchema>
