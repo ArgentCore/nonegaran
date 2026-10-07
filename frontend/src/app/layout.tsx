@@ -41,14 +41,16 @@ export default function RootLayout({
       className={`${vazirmatn.variable} ${notoNaskh.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <a href="#main-content" className="skip-link">
-          پرش به محتوای اصلی
-        </a>
-        <Header />
-        <main id="main-content" className="flex-grow">
-          <Providers>{children}</Providers>
-        </main>
-        <Footer />
+        <Providers>
+          <a href="#main-content" className="skip-link">
+            پرش به محتوای اصلی
+          </a>
+          <Header />
+          <main id="main-content" className="flex-grow">
+            {children}
+          </main>
+          <Footer />
+        </Providers>
       </body>
     </html>
   );
